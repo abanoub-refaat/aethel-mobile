@@ -33,7 +33,7 @@ export default function ArtWorkOverlay() {
       )}
 
       {!isMinimized && (
-        <View>
+        <View style={{ padding: 12 }}>
           <View style={styles.expandedHeader}>
             <View style={styles.metaColumn}>
               <Text style={styles.metaText}>
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     width: width * 0.9,
     left: width * 0.05,
-    padding: 20,
+    padding: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.15,
