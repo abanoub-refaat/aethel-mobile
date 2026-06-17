@@ -23,16 +23,16 @@ export default function HomeScreen() {
       onLoadStart={() => {
         setLoading(true);
         setErrorMsg(null);
-        console.log("🌅 Starting download...");
+        console.log("Starting download...");
       }}
       onLoad={() => {
         setLoading(false);
-        console.log("✅ Loaded successfully!");
+        console.log("Loaded successfully!");
       }}
       onError={(e) => {
         setLoading(false);
         setErrorMsg(e.nativeEvent.error);
-        console.log("❌ Native Error:", e.nativeEvent.error);
+        console.log("Native Error:", e.nativeEvent.error);
       }}
     >
       <View style={styles.debugContainer}>
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     height: height,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#2C1B2E", // Shows your theme if image drops
+    backgroundColor: "#2C1B2E",
   },
   debugContainer: {
     backgroundColor: "rgba(0,0,0,0.8)",
