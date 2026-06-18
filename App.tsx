@@ -1,13 +1,23 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { useState } from "react";
+
 import HomeScreen from "./src/screens/HomeScreen";
 import ArtWorkOverlay from "./src/components/ArtworkOverlay";
+import SplashScreen from "./src/screens/SplashScreen";
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   return (
     <View style={styles.container}>
-      <HomeScreen />
-      <ArtWorkOverlay />
+      {showSplash ? (
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      ) : (
+        <View>
+          <HomeScreen />
+          <ArtWorkOverlay />
+        </View>
+      )}
       <StatusBar style="auto" />
     </View>
   );

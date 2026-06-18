@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "aethel-mobile",
+    "name": "Aethel",
     "slug": "aethel-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/mobile-app-icon.png",
+    "icon": "./assets/mobile-app-icon-new.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f6f4f0"
     },
     "ios": {
       "supportsTablet": true
@@ -25,6 +25,16 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#f6f4f0",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 300
+        }
+      ]
+    ]
   }
 }
