@@ -1,10 +1,12 @@
+import "react-native-gesture-handler";
+
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import { useState } from "react";
 
-import HomeScreen from "./src/screens/HomeScreen";
-import ArtWorkOverlay from "./src/components/ArtworkOverlay";
 import SplashScreen from "./src/screens/SplashScreen";
+import { NavigationContainer } from "@react-navigation/native";
+import AppNavigator from "./src/navigation/AppNavigator";
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -13,10 +15,9 @@ export default function App() {
       {showSplash ? (
         <SplashScreen onFinish={() => setShowSplash(false)} />
       ) : (
-        <View>
-          <HomeScreen />
-          <ArtWorkOverlay />
-        </View>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
       )}
       <StatusBar style="auto" />
     </View>

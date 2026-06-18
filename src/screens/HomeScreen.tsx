@@ -8,6 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { useState } from "react";
+import ArtWorkOverlay from "../components/ArtworkOverlay";
 
 const { width, height } = Dimensions.get("window");
 
@@ -38,6 +39,7 @@ export default function HomeScreen() {
         console.log("Native Error:", e.nativeEvent.error);
       }}
     >
+      <ArtWorkOverlay />
       <View style={styles.topActionContainer}>
         <Pressable
           onPress={() => setIsFavorite(!isFavorite)}
