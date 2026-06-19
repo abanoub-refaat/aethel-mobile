@@ -7,11 +7,17 @@ import {
   Image,
 } from "react-native";
 import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+
+type ArtworkOverlayNavigation = {
+  navigate: (screen: "Details") => void;
+};
 
 const { width } = Dimensions.get("window");
 
 export default function ArtWorkOverlay() {
   const [isMinimized, setIsMinimized] = useState(true);
+  const navigation = useNavigation<ArtworkOverlayNavigation>();
 
   return (
     <View style={styles.infoCard}>
@@ -71,6 +77,15 @@ export default function ArtWorkOverlay() {
             during the August wheat harvest — a rare, humanizing glimpse of
             ordinary rural life in Renaissance art.
           </Text>
+          <Pressable
+            onPress={() => navigation.navigate("Details")}
+            style={({ pressed }) => [
+              styles.detailButton,
+              pressed && styles.pressedFeedback,
+            ]}
+          >
+            <Text style={styles.detailButtonText}>See Full Details</Text>
+          </Pressable>
         </View>
       )}
     </View>
@@ -145,5 +160,18 @@ const styles = StyleSheet.create({
   },
   pressedFeedback: {
     opacity: 0.6,
+  },
+  detailButton: {
+    marginTop: 12,
+    backgroundColor: "#4A3B4C",
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  detailButtonText: {
+    color: "#f6f4f0",
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
 });

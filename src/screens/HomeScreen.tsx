@@ -51,8 +51,8 @@ export default function HomeScreen() {
           <Image
             source={
               isFavorite
-                ? require("../../assets/icons/favorite-filled-svgrepo-com.png")
-                : require("../../assets/icons/favorite-svgrepo-com.png")
+                ? require("../../assets/icons/bookmark-filled-svgrepo-com.png")
+                : require("../../assets/icons/bookmark-svgrepo-com.png")
             }
             style={styles.icon}
             resizeMode="contain"
