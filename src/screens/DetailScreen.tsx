@@ -13,8 +13,18 @@ import { useNavigation } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
+import { Artwork } from "../types";
+
+import { useRoute, RouteProp } from "@react-navigation/native";
+
+type RootStackParamList = {
+  Details: { artwork: Artwork };
+};
 
 export default function DetailScreen() {
+  const route = useRoute<RouteProp<RootStackParamList, "Details">>();
+  const { artwork } = route.params;
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [isLoved, setIsLoved] = useState(false);
   const [count, setCount] = useState(0);
@@ -41,12 +51,15 @@ export default function DetailScreen() {
         <Image
           style={styles.image}
           source={{
-            uri: "https://images.metmuseum.org/CRDImages/ep/web-large/DP119115.jpg",
+            uri: artwork.imageUrl,
           }}
+          resizeMode="cover"
         />
         <View style={styles.mainHeader}>
-          <Text style={styles.title}>The Harvesters (1565)</Text>
-          <Text style={styles.artist}>Pieter Bruegel the Elder</Text>
+          <Text style={styles.title}>
+            {artwork.title} ({artwork.date})
+          </Text>
+          <Text style={styles.artist}>{artwork.artist}</Text>
         </View>
         <View style={styles.actionContainer}>
           <View style={styles.loveAction}>
@@ -98,19 +111,33 @@ export default function DetailScreen() {
               onPress={async () => {
                 try {
                   const isAvailable = await Sharing.isAvailableAsync();
-                  console.log("Sharing available:", isAvailable);
                   if (!isAvailable) {
                     alert("Sharing is not available on this device");
                     return;
                   }
-                  // Download first, then share the local file
-                  const fileUri =
-                    (FileSystem as any).documentDirectory + "share_artwork.jpg";
-                  await FileSystem.downloadAsync(
-                    "https://images.metmuseum.org/CRDImages/ep/web-large/DP119115.jpg",
-                    fileUri,
-                  );
-                  await Sharing.shareAsync(fileUri);
+                  const dir = FileSystem.documentDirectory;
+                  if (!dir) {
+                    alert("Storage unavailable");
+                    return;
+                  }
+                  const response = await fetch(artwork.imageUrl, {
+                    headers: {
+                      "User-Agent":
+                        "Aethel/1.0 (art education mobile app; https://github.com/abanoub-refaat/aethel-mobile)",
+                    },
+                  });
+                  const blob = await response.blob();
+
+                  const reader = new FileReader();
+                  reader.onloadend = async () => {
+                    const base64 = (reader.result as string).split(",")[1];
+                    const fileUri = dir + `aethel_${artwork.id}.jpg`;
+                    await FileSystem.writeAsStringAsync(fileUri, base64, {
+                      encoding: FileSystem.EncodingType.Base64,
+                    });
+                    await Sharing.shareAsync(fileUri);
+                  };
+                  reader.readAsDataURL(blob);
                 } catch (e) {
                   console.log("Share error:", e);
                 }
@@ -128,20 +155,35 @@ export default function DetailScreen() {
                 try {
                   const permission =
                     await MediaLibrary.requestPermissionsAsync();
-                  console.log("Permission:", permission.granted);
                   if (!permission.granted) {
                     alert("Permission denied");
                     return;
                   }
-                  const fileUri = FileSystem.documentDirectory + "artwork.jpg";
-                  console.log("Downloading to:", fileUri);
-                  const download = await FileSystem.downloadAsync(
-                    "https://images.metmuseum.org/CRDImages/ep/web-large/DP119115.jpg",
-                    fileUri,
-                  );
-                  console.log("Download result:", download.status);
-                  await MediaLibrary.saveToLibraryAsync(download.uri);
-                  alert("Saved to gallery!");
+                  const dir = FileSystem.documentDirectory;
+                  if (!dir) {
+                    alert("Storage unavailable");
+                    return;
+                  }
+
+                  const response = await fetch(artwork.imageUrl, {
+                    headers: {
+                      "User-Agent":
+                        "Aethel/1.0 (art education mobile app; https://github.com/abanoub-refaat/aethel-mobile)",
+                    },
+                  });
+                  const blob = await response.blob();
+
+                  const reader = new FileReader();
+                  reader.onloadend = async () => {
+                    const base64 = (reader.result as string).split(",")[1];
+                    const fileUri = dir + `aethel_${artwork.id}.jpg`;
+                    await FileSystem.writeAsStringAsync(fileUri, base64, {
+                      encoding: FileSystem.EncodingType.Base64,
+                    });
+                    await MediaLibrary.saveToLibraryAsync(fileUri);
+                    alert("Saved to gallery!");
+                  };
+                  reader.readAsDataURL(blob);
                 } catch (e) {
                   console.log("Download error:", e);
                 }
@@ -160,18 +202,11 @@ export default function DetailScreen() {
       <ScrollView style={styles.details}>
         <Text style={styles.storyLabel}>The Story Behined This Artwork: </Text>
         <View style={styles.divider} />
-        <Text style={styles.storyBody}>
-          One of six surviving panels commissioned to depict the seasons, this
-          masterpiece captures Flemish peasants resting beneath a pear tree
-          during the August wheat harvest — a rare, humanizing glimpse of
-          ordinary rural life in Renaissance art.
-        </Text>
+        <Text style={styles.storyBody}>{artwork.story}</Text>
         <Text style={styles.metaLabel}>Medium</Text>
-        <Text style={styles.metaValue}>Oil on wood</Text>
+        <Text style={styles.metaValue}>{artwork.medium}</Text>
         <Text style={styles.metaLabel}>Location</Text>
-        <Text style={styles.metaValue}>
-          The Metropolitan Museum of Art, New York
-        </Text>
+        <Text style={styles.metaValue}>{artwork.location}</Text>
       </ScrollView>
     </SafeAreaView>
   );

@@ -7,20 +7,39 @@ import {
   Image,
   Pressable,
 } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ArtWorkOverlay from "../components/ArtworkOverlay";
+import { Artwork } from "../types";
 
 const { width, height } = Dimensions.get("window");
+
+import {
+  fetchArtwork,
+  randomArtworkPicker,
+  ARTWORK_TITLES,
+} from "../services/wikipedia";
 
 export default function HomeScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [artwork, setArtwork] = useState<Artwork | null>(null);
+
+  useEffect(() => {
+    const title = randomArtworkPicker(ARTWORK_TITLES);
+    fetchArtwork(title).then((data) => {
+      if (data) setArtwork(data as Artwork);
+    });
+  }, []);
 
   return (
     <ImageBackground
       source={{
-        uri: "https://images.metmuseum.org/CRDImages/ep/web-large/DP119115.jpg",
+        uri: artwork?.imageUrl,
+        headers: {
+          "User-Agent":
+            "Aethel/1.0 (art education mobile app; https://github.com/abanoub-refaat/aethel-mobile)",
+        },
       }}
       resizeMode="cover"
       style={styles.backgroundCanvas}
@@ -39,7 +58,7 @@ export default function HomeScreen() {
         console.log("Native Error:", e.nativeEvent.error);
       }}
     >
-      <ArtWorkOverlay />
+      {artwork && <ArtWorkOverlay artwork={artwork} />}
       <View style={styles.topActionContainer}>
         <Pressable
           onPress={() => setIsFavorite(!isFavorite)}

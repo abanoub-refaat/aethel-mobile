@@ -8,14 +8,19 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { Artwork } from "../types";
 
 type ArtworkOverlayNavigation = {
-  navigate: (screen: "Details") => void;
+  navigate: (screen: "Details", params: { artwork: Artwork }) => void;
 };
 
 const { width } = Dimensions.get("window");
 
-export default function ArtWorkOverlay() {
+type Props = {
+  artwork: Artwork;
+};
+
+export default function ArtWorkOverlay({ artwork }: Props) {
   const [isMinimized, setIsMinimized] = useState(true);
   const navigation = useNavigation<ArtworkOverlayNavigation>();
 
@@ -43,14 +48,13 @@ export default function ArtWorkOverlay() {
           <View style={styles.expandedHeader}>
             <View style={styles.metaColumn}>
               <Text style={styles.metaText}>
-                <Text style={styles.labelBold}>Title: </Text>The Harvesters
+                <Text style={styles.labelBold}>Title: {artwork.title} </Text>
               </Text>
               <Text style={styles.metaText}>
-                <Text style={styles.labelBold}>Artist: </Text>Pieter Bruegel the
-                Elder
+                <Text style={styles.labelBold}>Artist: {artwork.artist} </Text>
               </Text>
               <Text style={styles.metaText}>
-                <Text style={styles.labelBold}>Date: </Text>1565
+                <Text style={styles.labelBold}>Date: {artwork.date} </Text>
               </Text>
             </View>
 
@@ -72,13 +76,12 @@ export default function ArtWorkOverlay() {
           <View style={styles.divider} />
 
           <Text style={styles.story}>
-            One of six surviving panels commissioned to depict the seasons, this
-            masterpiece captures Flemish peasants resting beneath a pear tree
-            during the August wheat harvest — a rare, humanizing glimpse of
-            ordinary rural life in Renaissance art.
+            {artwork.story.length > 120
+              ? artwork.story.substring(0, 120) + "..."
+              : artwork.story}
           </Text>
           <Pressable
-            onPress={() => navigation.navigate("Details")}
+            onPress={() => navigation.navigate("Details", { artwork })}
             style={({ pressed }) => [
               styles.detailButton,
               pressed && styles.pressedFeedback,
