@@ -1,12 +1,24 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { generateArtStory } from "./ai";
+
+const CACHE_KEY_PREFIX = "@aethel_story:";
+
 const ARTWORK_TITLES = [
   "The_Night_Watch.jpg",
   "Girl_with_a_Pearl_Earring.jpg",
   "Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
   "The_Scream.jpg",
   "Las_Meninas.jpg",
-  "Wanderer_above_the_sea_of_fog.jpg",
   "Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg",
-  "Jan_van_Eyck_-_Arnolfini_Portrait.jpg",
+  "Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg",
+  "Leonardo_da_Vinci_-_Mona_Lisa_-_Google_Art_Project.jpg",
+  "Sandro_Botticelli_-_La_Nascita_di_Venere_-_Google_Art_Project.jpg",
+  "Georges_Seurat_-_A_Sunday_on_La_Grande_Jatte_--_1884_-_Google_Art_Project.jpg",
+  "James_Abbott_McNeill_Whistler_-_Whistler's_Mother_-_Google_Art_Project.jpg",
+  "Edouard_Manet_-_A_Bar_at_the_Folies-Bergere_-_Google_Art_Project.jpg",
+  "Katsushika_Hokusai_-_Under_the_Wave_off_Kanagawa_-_Google_Art_Project.jpg",
+  "Diego_Velazquez_-_The_Surrender_of_Breda_-_Google_Art_Project.jpg",
+  "Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog_-_Google_Art_Project.jpg",
 ];
 
 const randomArtworkPicker = function (artworkTitles: Array<string>) {
@@ -81,12 +93,31 @@ const fetchArtwork = async (title: string) => {
       medium: stripHtml(meta.Medium?.value || ""),
       location: stripHtml(meta.Credit?.value || ""),
       isPublicDomain: true,
-      source: "wikimedia",
+      source: "wikimedia" as const,
     };
+
+    try {
+      const cacheKey = `${CACHE_KEY_PREFIX}${artwork.id}`;
+      const cachedStory = await AsyncStorage.getItem(cacheKey);
+
+      if (cachedStory) {
+        artwork.story = cachedStory;
+      } else {
+        const aiStory = await generateArtStory(artwork as any);
+        await AsyncStorage.setItem(cacheKey, aiStory);
+        artwork.story = aiStory;
+      }
+    } catch (cacheError) {
+      console.log(
+        "Storage/AI pipeline failed, falling back to original meta:",
+        cacheError,
+      );
+    }
 
     return artwork;
   } catch (error) {
     console.log("Fetch error:", error);
+    return null;
   }
 };
 
