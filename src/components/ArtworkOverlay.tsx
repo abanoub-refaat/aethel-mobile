@@ -14,7 +14,7 @@ type ArtworkOverlayNavigation = {
   navigate: (screen: "Details", params: { artwork: Artwork }) => void;
 };
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 type Props = {
   artwork: Artwork;
@@ -24,38 +24,38 @@ export default function ArtWorkOverlay({ artwork }: Props) {
   const [isMinimized, setIsMinimized] = useState(true);
   const navigation = useNavigation<ArtworkOverlayNavigation>();
 
-  return (
-    <View style={styles.infoCard}>
-      {isMinimized && (
-        <Pressable
-          onPress={() => setIsMinimized(false)}
-          style={({ pressed }) => [
-            styles.infoButtonRow,
-            pressed && styles.pressedFeedback,
-          ]}
-        >
-          <Image
-            source={require("../../assets/icons/info-circle-svgrepo-com.png")}
-            style={styles.icon}
-            resizeMode="contain"
-          />
-          <Text style={styles.promptText}>Want to know more?</Text>
-        </Pressable>
-      )}
+  if (isMinimized) {
+    return (
+      <Pressable
+        onPress={() => setIsMinimized(false)}
+        style={({ pressed }) => [
+          styles.floatingInfoButton,
+          pressed && styles.pressedFeedback,
+        ]}
+      >
+        <Image
+          source={require("../../assets/icons/details-circle-svgrepo-com.png")}
+          style={styles.infoIcon}
+          resizeMode="contain"
+        />
+      </Pressable>
+    );
+  }
 
-      {!isMinimized && (
+  return (
+    <View style={styles.fullscreenDismissContainer}>
+      <Pressable
+        style={styles.absoluteDismiss}
+        onPress={() => setIsMinimized(true)}
+      />
+
+      <View style={styles.infoCard}>
         <View style={{ padding: 12 }}>
           <View style={styles.expandedHeader}>
             <View style={styles.metaColumn}>
-              <Text style={styles.metaText}>
-                <Text style={styles.labelBold}>Title: {artwork.title} </Text>
-              </Text>
-              <Text style={styles.metaText}>
-                <Text style={styles.labelBold}>Artist: {artwork.artist} </Text>
-              </Text>
-              <Text style={styles.metaText}>
-                <Text style={styles.labelBold}>Date: {artwork.date} </Text>
-              </Text>
+              <Text style={styles.artworkTitle}>{artwork.title}</Text>
+              <Text style={styles.artworkArtist}>{artwork.artist}</Text>
+              <Text style={styles.artworkDate}>{artwork.date}</Text>
             </View>
 
             <Pressable
@@ -67,7 +67,7 @@ export default function ArtWorkOverlay({ artwork }: Props) {
             >
               <Image
                 source={require("../../assets/icons/close-circle-svgrepo-com.png")}
-                style={styles.icon}
+                style={styles.closeIcon}
                 resizeMode="contain"
               />
             </Pressable>
@@ -76,45 +76,77 @@ export default function ArtWorkOverlay({ artwork }: Props) {
           <View style={styles.divider} />
 
           <Text style={styles.story}>
-            {artwork.story.length > 120
-              ? artwork.story.substring(0, 120) + "..."
+            {artwork.story.length > 160
+              ? artwork.story.substring(0, 260) + " ..."
               : artwork.story}
           </Text>
+
           <Pressable
-            onPress={() => navigation.navigate("Details", { artwork })}
+            onPress={() => {
+              setIsMinimized(true);
+              navigation.navigate("Details", { artwork });
+            }}
             style={({ pressed }) => [
               styles.detailButton,
               pressed && styles.pressedFeedback,
             ]}
           >
-            <Text style={styles.detailButtonText}>See Full Details</Text>
+            <Text style={styles.detailButtonText}>
+              Read More Detailed Blog →
+            </Text>
           </Pressable>
         </View>
-      )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  infoCard: {
-    backgroundColor: "rgba(253, 251, 247, 0.62)",
+  floatingInfoButton: {
     position: "absolute",
-    bottom: 30,
-    borderRadius: 24,
-    width: width * 0.9,
-    left: width * 0.05,
-    padding: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  infoButtonRow: {
-    flexDirection: "row",
+    right: 20,
+    top: 100,
+    backgroundColor: "rgba(253, 251, 247, 0.79)",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(44, 27, 46, 0.08)",
+  },
+  infoIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "#2C1B2E",
+  },
+  fullscreenDismissContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 99,
+  },
+  absoluteDismiss: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.15)",
+  },
+  infoCard: {
+    backgroundColor: "rgba(253, 251, 247, 0.79)",
+    borderRadius: 26,
+    width: width * 0.86,
+    padding: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 15 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: "rgba(2C, 1B, 2E, 0.05)",
   },
   expandedHeader: {
     flexDirection: "row",
@@ -123,58 +155,60 @@ const styles = StyleSheet.create({
   },
   metaColumn: {
     flex: 1,
-    paddingRight: 12,
+    paddingRight: 8,
+  },
+  artworkTitle: {
+    fontSize: 20,
+    color: "#2C1B2E",
+    fontWeight: "800",
+    fontFamily: "Inter-Bold",
+    marginBottom: 4,
+  },
+  artworkArtist: {
+    fontSize: 15,
+    color: "#4A3B4C",
+    fontFamily: "Inter-Medium",
+    marginBottom: 2,
+  },
+  artworkDate: {
+    fontSize: 13,
+    color: "#63385b",
+    fontFamily: "Inter-Regular",
   },
   closeButton: {
     padding: 4,
   },
-  icon: {
-    width: 22,
-    height: 22,
-    tintColor: "#2C1B2E",
-  },
-  promptText: {
-    fontSize: 15,
-    color: "#4A3B4C",
-    fontFamily: "Inter-Medium",
-    marginLeft: 8,
-  },
-  metaText: {
-    fontSize: 15,
-    color: "#2C1B2E",
-    marginBottom: 4,
-    fontFamily: "Inter-Regular",
-  },
-  labelBold: {
-    fontWeight: "800",
-    fontFamily: "Inter-Bold",
+  closeIcon: {
+    width: 24,
+    height: 24,
   },
   divider: {
     height: 1,
-    backgroundColor: "rgba(44, 27, 46, 0.1)",
-    marginVertical: 12,
+    backgroundColor: "rgba(44, 27, 46, 0.08)",
+    marginVertical: 14,
   },
   story: {
     fontSize: 14,
     color: "#4A3B4C",
     fontFamily: "Inter-Light",
     lineHeight: 22,
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   pressedFeedback: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   detailButton: {
-    marginTop: 12,
-    backgroundColor: "#4A3B4C",
-    borderRadius: 12,
-    paddingVertical: 10,
+    marginTop: 18,
+    borderRadius: 14,
+    paddingVertical: 12,
     alignItems: "center",
+    justifyContent: "center",
   },
   detailButtonText: {
-    color: "#f6f4f0",
+    color: "#4A3B4C",
     fontSize: 14,
     fontWeight: "700",
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
+    fontFamily: "Inter-Bold",
   },
 });

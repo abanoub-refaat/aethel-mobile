@@ -26,10 +26,18 @@ export default function HomeScreen() {
   const [artwork, setArtwork] = useState<Artwork | null>(null);
 
   useEffect(() => {
-    const title = randomArtworkPicker(ARTWORK_TITLES);
-    fetchArtwork(title).then((data) => {
-      if (data) setArtwork(data as Artwork);
-    });
+    const loadArtwork = async () => {
+      let result = null;
+      let attempts = 0;
+      while (!result && attempts < 10) {
+        const title = randomArtworkPicker(ARTWORK_TITLES);
+        result = await fetchArtwork(title);
+        attempts++;
+      }
+      if (result) setArtwork(result as Artwork);
+      else console.log("Failed to load artwork after 10 attempts");
+    };
+    loadArtwork();
   }, []);
 
   return (
