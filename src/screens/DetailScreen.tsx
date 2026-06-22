@@ -7,14 +7,24 @@ import {
   ScrollView,
 } from "react-native";
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import { Artwork } from "../types";
-
+import {
+  saveBookmark,
+  removeBookmark,
+  getBookmarks,
+} from "../storage/favorites";
+import {
+  getLikeCount,
+  toggleLike,
+  getIsLiked,
+  setIsLiked,
+} from "../storage/likes";
 import { useRoute, RouteProp } from "@react-navigation/native";
 
 type RootStackParamList = {
@@ -29,6 +39,23 @@ export default function DetailScreen() {
   const [isLoved, setIsLoved] = useState(false);
   const [count, setCount] = useState(0);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const checkBookmark = async () => {
+      const bookmarks = await getBookmarks();
+      const alreadyBookmarked = bookmarks.some((b) => b.id === artwork.id);
+      setIsFavorite(alreadyBookmarked);
+    };
+    checkBookmark();
+
+    const loadLikes = async () => {
+      const count = await getLikeCount(artwork.id);
+      const liked = await getIsLiked(artwork.id);
+      setCount(count);
+      setIsLoved(liked);
+    };
+    loadLikes();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -64,12 +91,10 @@ export default function DetailScreen() {
         <View style={styles.actionContainer}>
           <View style={styles.loveAction}>
             <Pressable
-              onPress={() => {
-                if (isLoved) {
-                  setCount(count - 1);
-                } else {
-                  setCount(count + 1);
-                }
+              onPress={async () => {
+                const newCount = await toggleLike(artwork.id, count, isLoved);
+                await setIsLiked(artwork.id, !isLoved);
+                setCount(newCount);
                 setIsLoved(!isLoved);
               }}
               style={({ pressed }) => [
@@ -91,7 +116,14 @@ export default function DetailScreen() {
           </View>
           <View style={styles.actions}>
             <Pressable
-              onPress={() => setIsFavorite(!isFavorite)}
+              onPress={async () => {
+                if (isFavorite) {
+                  await removeBookmark(artwork.id);
+                } else {
+                  await saveBookmark(artwork);
+                }
+                setIsFavorite(!isFavorite);
+              }}
               style={({ pressed }) => [
                 styles.favoriteButton,
                 pressed && styles.buttonPressed,

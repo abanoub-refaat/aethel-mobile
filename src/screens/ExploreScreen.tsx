@@ -18,7 +18,12 @@ export default function ExploreScreen() {
     });
   }, []);
 
-  if (loading) return <Text>Loading...</Text>;
+  if (loading)
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </SafeAreaView>
+    );
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ padding: 18 }}>
@@ -59,11 +64,26 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 24,
+    letterSpacing: 2,
     color: "#63385b",
     fontFamily: "Inter-Bold",
   },
   mainHeader: {
     fontSize: 48,
-    fontFamily: "Inter-Extra-Bold",
+    fontWeight: "800",
+    lineHeight: 42,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "#f6f4f0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#63385b",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    fontFamily: "Inter-Regular",
   },
 });

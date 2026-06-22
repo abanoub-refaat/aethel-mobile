@@ -10,6 +10,11 @@ import {
 import { useState, useEffect } from "react";
 import ArtWorkOverlay from "../components/ArtworkOverlay";
 import { Artwork } from "../types";
+import {
+  saveBookmark,
+  removeBookmark,
+  getBookmarks,
+} from "../storage/favorites";
 
 const { width, height } = Dimensions.get("window");
 
@@ -34,8 +39,12 @@ export default function HomeScreen() {
         result = await fetchArtwork(title);
         attempts++;
       }
-      if (result) setArtwork(result as Artwork);
-      else console.log("Failed to load artwork after 10 attempts");
+      if (result) {
+        setArtwork(result as Artwork);
+        const bookmarks = await getBookmarks();
+        const alreadyBookmarked = bookmarks.some((b) => b.id === result!.id);
+        setIsFavorite(alreadyBookmarked);
+      } else console.log("Failed to load artwork after 10 attempts");
     };
     loadArtwork();
   }, []);
@@ -69,7 +78,15 @@ export default function HomeScreen() {
       {artwork && <ArtWorkOverlay artwork={artwork} />}
       <View style={styles.topActionContainer}>
         <Pressable
-          onPress={() => setIsFavorite(!isFavorite)}
+          onPress={async () => {
+            if (!artwork) return;
+            if (isFavorite) {
+              await removeBookmark(artwork.id);
+            } else {
+              await saveBookmark(artwork);
+            }
+            setIsFavorite(!isFavorite);
+          }}
           style={({ pressed }) => [
             styles.favoriteButton,
             pressed && styles.buttonPressed,
