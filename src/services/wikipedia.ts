@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { generateArtStory } from "./ai";
+import { Artwork } from "../types";
 
 const CACHE_KEY_PREFIX = "@aethel_story:";
 
@@ -36,10 +37,8 @@ const ARTWORK_TITLES = [
   "Rembrandt_Harmensz._van_Rijn_-_Jeremia_treurend_over_de_verwoesting_van_Jeruzalem_-_Google_Art_Project.jpg",
   "Descent_from_the_Cross_(Rembrant).jpg",
   "Christ_in_the_Wilderness_-_Ivan_Kramskoy_-_Google_Cultural_Institute.jpg",
-  "Christ_of_Saint_John_of_the_Cross.jpg",
   "Van_Gogh_-_Terrace_of_a_Café_at_Night_(Place_du_Forum)_1888.jpg",
   "Caravaggio,_Michelangelo_Merisi_da_-_The_Calling_of_Saint_Matthew_-_1599-1600_(hi_res).jpg",
-  "Science_and_Charity_by_Picasso.jpg",
   "Jacob_Wrestling_with_the_Angel.jpg",
   "Vincent_van_Gogh_-_Almond_blossom_-_Google_Art_Project.jpg",
 ];
@@ -144,4 +143,18 @@ const fetchArtwork = async (title: string) => {
   }
 };
 
-export { fetchArtwork, randomArtworkPicker, ARTWORK_TITLES };
+const fetchMulipleArtworks = async (count: number) => {
+  const shuffled = [...ARTWORK_TITLES].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, count);
+  const results = await Promise.all(
+    selected.map((title) => fetchArtwork(title)),
+  );
+  return results.filter(Boolean) as Artwork[];
+};
+
+export {
+  fetchArtwork,
+  randomArtworkPicker,
+  fetchMulipleArtworks,
+  ARTWORK_TITLES,
+};
