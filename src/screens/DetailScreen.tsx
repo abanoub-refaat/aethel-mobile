@@ -27,6 +27,7 @@ import {
 } from "../storage/likes";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { setDeviceWallpaper } from "wallpaper-setter";
+import useToast from "../hooks/useToast";
 type RootStackParamList = {
   Details: { artwork: Artwork };
 };
@@ -40,6 +41,7 @@ export default function DetailScreen() {
   const [isLoved, setIsLoved] = useState(false);
   const [count, setCount] = useState(0);
   const navigation = useNavigation();
+  const { showToast, ToastComponent } = useToast();
 
   useEffect(() => {
     const checkBookmark = async () => {
@@ -63,7 +65,7 @@ export default function DetailScreen() {
     try {
       const dir = FileSystem.documentDirectory;
       if (!dir) {
-        alert("Storage unavailable");
+        showToast("Storage unavailable");
         return;
       }
 
@@ -88,13 +90,13 @@ export default function DetailScreen() {
           const success = await setDeviceWallpaper(fileUri);
 
           if (success) {
-            alert("Wallpaper set successfully!");
+            showToast("Wallpaper set successfully!");
           } else {
-            alert("Failed to apply system wallpaper.");
+            showToast("Failed to apply system wallpaper.");
           }
         } catch (nativeErr) {
           console.error("Native swap crash:", nativeErr);
-          alert("Failed to apply system wallpaper.");
+          showToast("Failed to apply system wallpaper.");
         } finally {
           setIsSetting(false);
         }
@@ -102,7 +104,7 @@ export default function DetailScreen() {
       reader.readAsDataURL(blob);
     } catch (error) {
       console.error("Wallpaper process failed: ", error);
-      alert("Error caching artwork asset.");
+      showToast("Error caching artwork asset.");
       setIsSetting(false);
     }
   };
@@ -194,12 +196,12 @@ export default function DetailScreen() {
                 try {
                   const isAvailable = await Sharing.isAvailableAsync();
                   if (!isAvailable) {
-                    alert("Sharing is not available on this device");
+                    showToast("Sharing is not available on this device");
                     return;
                   }
                   const dir = FileSystem.documentDirectory;
                   if (!dir) {
-                    alert("Storage unavailable");
+                    showToast("Storage unavailable");
                     return;
                   }
                   const response = await fetch(artwork.imageUrl, {
@@ -238,12 +240,12 @@ export default function DetailScreen() {
                   const permission =
                     await MediaLibrary.requestPermissionsAsync();
                   if (!permission.granted) {
-                    alert("Permission denied");
+                    showToast("Permission denied");
                     return;
                   }
                   const dir = FileSystem.documentDirectory;
                   if (!dir) {
-                    alert("Storage unavailable");
+                    showToast("Storage unavailable");
                     return;
                   }
 
@@ -263,7 +265,7 @@ export default function DetailScreen() {
                       encoding: FileSystem.EncodingType.Base64,
                     });
                     await MediaLibrary.saveToLibraryAsync(fileUri);
-                    alert("Saved to gallery!");
+                    showToast("Saved to gallery!");
                   };
                   reader.readAsDataURL(blob);
                 } catch (e) {
@@ -308,6 +310,7 @@ export default function DetailScreen() {
         <Text style={styles.metaLabel}>Location</Text>
         <Text style={styles.metaValue}>{artwork.location}</Text>
       </ScrollView>
+      {ToastComponent}
     </SafeAreaView>
   );
 }
