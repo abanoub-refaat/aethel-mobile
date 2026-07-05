@@ -5,6 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Artwork } from "../types";
 import { fetchMulipleArtworks } from "../services/wikipedia";
 import ArtworkCard from "../components/ArtworkCard";
+import { StatusBar } from "expo-status-bar";
 
 export default function ExploreScreen() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -26,6 +27,8 @@ export default function ExploreScreen() {
     );
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
+
       <View style={{ padding: 18 }}>
         <Text style={styles.screenTitle}>EXPLORE</Text>
         <Text style={styles.mainHeader}>Discover Masterpieces</Text>

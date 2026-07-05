@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { Artwork } from "../types";
 import { getBookmarks, removeBookmark } from "../storage/favorites";
 import ArtworkFavoriteCard from "../components/ArtworkFavoriteCard";
+import { StatusBar } from "expo-status-bar";
 
 export default function FavoriteScreen() {
   const [favorites, setFavorites] = useState<Artwork[]>([]);
@@ -31,6 +32,8 @@ export default function FavoriteScreen() {
   if (favorites.length == 0) {
     return (
       <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+
         <View style={{ padding: 18 }}>
           <Text style={styles.screenTitle}>FAVORITES</Text>
           <Text style={styles.mainHeader}>Your Personal Gallery</Text>

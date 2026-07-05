@@ -28,6 +28,7 @@ import {
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { setDeviceWallpaper } from "wallpaper-setter";
 import useToast from "../hooks/useToast";
+import { StatusBar } from "expo-status-bar";
 type RootStackParamList = {
   Details: { artwork: Artwork };
 };
@@ -111,6 +112,7 @@ export default function DetailScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
       <View style={styles.topActionContainer}>
         <Pressable
           onPress={() => navigation.goBack()}
