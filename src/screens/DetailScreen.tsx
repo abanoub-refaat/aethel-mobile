@@ -26,7 +26,7 @@ import {
   setIsLiked,
 } from "../storage/likes";
 import { useRoute, RouteProp } from "@react-navigation/native";
-
+import { setDeviceWallpaper } from "wallpaper-setter";
 type RootStackParamList = {
   Details: { artwork: Artwork };
 };
@@ -36,6 +36,7 @@ export default function DetailScreen() {
   const { artwork } = route.params;
 
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isSetting, setIsSetting] = useState(false);
   const [isLoved, setIsLoved] = useState(false);
   const [count, setCount] = useState(0);
   const navigation = useNavigation();
@@ -56,6 +57,55 @@ export default function DetailScreen() {
     };
     loadLikes();
   }, []);
+
+  const handleSetWallpaper = async () => {
+    setIsSetting(true);
+    try {
+      const dir = FileSystem.documentDirectory;
+      if (!dir) {
+        alert("Storage unavailable");
+        return;
+      }
+
+      const response = await fetch(artwork.imageUrl, {
+        headers: {
+          "User-Agent":
+            "Aethel/1.0 (art education mobile app; https://github.com/abanoub-refaat/aethel-mobile)",
+        },
+      });
+      const blob = await response.blob();
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64 = (reader.result as string).split(",")[1];
+          const fileUri = dir + `aethel_wp_${artwork.id}.jpg`;
+
+          await FileSystem.writeAsStringAsync(fileUri, base64, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+
+          const success = await setDeviceWallpaper(fileUri);
+
+          if (success) {
+            alert("Wallpaper set successfully!");
+          } else {
+            alert("Failed to apply system wallpaper.");
+          }
+        } catch (nativeErr) {
+          console.error("Native swap crash:", nativeErr);
+          alert("Failed to apply system wallpaper.");
+        } finally {
+          setIsSetting(false);
+        }
+      };
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error("Wallpaper process failed: ", error);
+      alert("Error caching artwork asset.");
+      setIsSetting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -228,6 +278,24 @@ export default function DetailScreen() {
                 resizeMode="contain"
               />
             </Pressable>
+
+            <View style={styles.verticalDivider} />
+
+            <Pressable
+              onPress={handleSetWallpaper}
+              disabled={isSetting}
+              style={[styles.favoriteButton, isSetting && { opacity: 0.5 }]}
+            >
+              <Image
+                source={
+                  isSetting
+                    ? require("../../assets/icons/set-wallpaper-active-wallpaper-svgrep-com.png")
+                    : require("../../assets/icons/set-wallpaper-svgrepo-com.png")
+                }
+                style={styles.icon}
+                resizeMode="contain"
+              />
+            </Pressable>
           </View>
         </View>
       </View>
@@ -261,7 +329,7 @@ const styles = StyleSheet.create({
   actionContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 100,
+    gap: 53,
   },
   actions: {
     flexDirection: "row",
@@ -346,5 +414,12 @@ const styles = StyleSheet.create({
   metaValue: {
     fontSize: 14,
     color: "#63385b",
+  },
+  verticalDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: "rgba(44, 27, 46, 0.15)",
+    alignSelf: "center",
+    marginHorizontal: 4,
   },
 });

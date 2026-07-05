@@ -7,7 +7,6 @@ import { useState } from "react";
 import SplashScreen from "./src/screens/SplashScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import AppNavigator from "./src/navigation/AppNavigator";
-import DetailScreen from "./src/screens/DetailScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {

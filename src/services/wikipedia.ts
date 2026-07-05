@@ -41,6 +41,21 @@ const ARTWORK_TITLES = [
   "Caravaggio,_Michelangelo_Merisi_da_-_The_Calling_of_Saint_Matthew_-_1599-1600_(hi_res).jpg",
   "Jacob_Wrestling_with_the_Angel.jpg",
   "Vincent_van_Gogh_-_Almond_blossom_-_Google_Art_Project.jpg",
+  "Manuel_Domínguez_Sánchez_-_El_suicidio_de_Séneca.jpg",
+  "Iván_el_Terrible_y_su_hijo,_por_Iliá_Repin.jpg",
+  `"Le_dernier_soupir_du_Christ",_Julien_Michel_Gué,_1840._(35186172350).jpg`,
+  "The_Wounded_Angel_-_Hugo_Simberg.jpg",
+  "Toulmouche_Bride.jpg",
+  "Leighton-God_Speed!.jpg",
+  "Accolade_by_Edmund_Blair_Leighton.jpg",
+  "Frank_Bernard_Dicksee_(1853-1928)_-_La_belle_dame_sans_merci_-_K328_-_Bristol_City_Museum_^_Art_Gallery.jpg",
+  "Vasily_Pukirev_-_Неравный_брак_-_Google_Art_Project.jpg",
+  "Ophelia_(1847-48),_by_Henri_Lehmann.jpg",
+  `The_Two_Central_Figures_in_"Derby_Day"_-_William_Powell_Frith.jpg`,
+  "William_Holman_Hunt_-_The_Awakening_Conscience_-_Google_Art_Project.jpg",
+  "Joean_Honoré_Fragonard_-_The_Swing.jpg",
+  "Gabriël_Metsu_-_The_Triumph_of_Justice_-_95_-_Mauritshuis.jpg",
+  "Carlo_Dolci_(Florence_1616-86)_-_Salome_with_the_Head_of_John_the_Baptist_-_RCIN_405639_-_Royal_Collection.jpg",
 ];
 
 const randomArtworkPicker = function (artworkTitles: Array<string>) {
