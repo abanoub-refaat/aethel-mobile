@@ -3,21 +3,47 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Artwork } from "../types";
-import { fetchMulipleArtworks } from "../services/wikipedia";
+import { ARTWORK_TITLES, fetchArtwork } from "../services/wikipedia";
 import ArtworkCard from "../components/ArtworkCard";
 import { StatusBar } from "expo-status-bar";
 
 export default function ExploreScreen() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const navigation = useNavigation<any>();
 
+  const fetchMultipleArtworks = async (
+    count: number,
+    excludeIds: string[] = [],
+  ) => {
+    const shuffled = [...ARTWORK_TITLES].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, count + excludeIds.length);
+    const results = await Promise.all(
+      selected.map((title) => fetchArtwork(title)),
+    );
+    return results
+      .filter(Boolean)
+      .filter((a) => !excludeIds.includes(a!.id)) as Artwork[];
+  };
+
   useEffect(() => {
-    fetchMulipleArtworks(14).then((data) => {
-      setArtworks(data);
+    const initLoad = async () => {
+      const initial = await fetchMultipleArtworks(6);
+      setArtworks(initial);
       setLoading(false);
-    });
+    };
+    initLoad();
   }, []);
+
+  const loadMore = async () => {
+    if (loadingMore) return;
+    setLoadingMore(true);
+    const existingIds = artworks.map((a) => a.id);
+    const more = await fetchMultipleArtworks(6, existingIds);
+    setArtworks((prev) => [...prev, ...more]);
+    setLoadingMore(false);
+  };
 
   if (loading)
     return (
@@ -38,6 +64,8 @@ export default function ExploreScreen() {
       </View>
 
       <FlatList
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
         numColumns={2}
         data={artworks}
         renderItem={({ item }) => (
@@ -48,6 +76,11 @@ export default function ExploreScreen() {
         )}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 8 }}
+        ListFooterComponent={
+          loadingMore ? (
+            <Text style={styles.loadingMoreText}>Loading more...</Text>
+          ) : null
+        }
       />
     </SafeAreaView>
   );
@@ -86,6 +119,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#63385b",
     letterSpacing: 2,
+    textTransform: "uppercase",
+    fontFamily: "Inter-Regular",
+  },
+  loadingMoreText: {
+    fontSize: 16,
+    color: "#63385b",
+    letterSpacing: 1,
+    justifyContent: "center",
     textTransform: "uppercase",
     fontFamily: "Inter-Regular",
   },
