@@ -266,7 +266,8 @@ export default function DetailScreen() {
                     await FileSystem.writeAsStringAsync(fileUri, base64, {
                       encoding: FileSystem.EncodingType.Base64,
                     });
-                    await MediaLibrary.saveToLibraryAsync(fileUri);
+                    const asset = await MediaLibrary.createAssetAsync(fileUri);
+                    await MediaLibrary.createAlbumAsync("Aethel", asset, false);
                     showToast("Saved to gallery!");
                   };
                   reader.readAsDataURL(blob);
@@ -402,8 +403,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   storyBody: {
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 24,
     color: "#4a3a47",
     marginBottom: 20,
   },
