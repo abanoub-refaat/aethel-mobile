@@ -6,11 +6,15 @@ import { Artwork } from "../types";
 import { ARTWORK_TITLES, fetchArtwork } from "../services/wikipedia";
 import ArtworkCard from "../components/ArtworkCard";
 import { StatusBar } from "expo-status-bar";
+import NetInfo from "@react-native-community/netinfo";
 
 export default function ExploreScreen() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [shownTitles, setShownTitles] = useState<string[]>([]);
+  const [listExhausted, setListExhausted] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
   const navigation = useNavigation<any>();
 
   const fetchMultipleArtworks = async (
@@ -29,6 +33,12 @@ export default function ExploreScreen() {
 
   useEffect(() => {
     const initLoad = async () => {
+      const netState = await NetInfo.fetch();
+      if (!netState.isConnected) {
+        setIsOffline(true);
+        setLoading(false);
+        return;
+      }
       const initial = await fetchMultipleArtworks(6);
       setArtworks(initial);
       setLoading(false);
@@ -37,11 +47,15 @@ export default function ExploreScreen() {
   }, []);
 
   const loadMore = async () => {
-    if (loadingMore) return;
+    if (loadingMore || listExhausted) return;
     setLoadingMore(true);
     const existingIds = artworks.map((a) => a.id);
     const more = await fetchMultipleArtworks(6, existingIds);
-    setArtworks((prev) => [...prev, ...more]);
+    if (more.length === 0) {
+      setListExhausted(true);
+    } else {
+      setArtworks((prev) => [...prev, ...more]);
+    }
     setLoadingMore(false);
   };
 
@@ -51,6 +65,18 @@ export default function ExploreScreen() {
         <Text style={styles.loadingText}>Loading...</Text>
       </SafeAreaView>
     );
+
+  if (isOffline)
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <Text style={styles.exhaustedTitle}>You're offline</Text>
+        <Text style={styles.exhaustedSubtitle}>
+          Check your Favorites for saved paintings — they're available without
+          internet.
+        </Text>
+      </SafeAreaView>
+    );
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -77,8 +103,15 @@ export default function ExploreScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 8 }}
         ListFooterComponent={
-          loadingMore ? (
-            <Text style={styles.loadingMoreText}>Loading more...</Text>
+          listExhausted ? (
+            <View style={styles.exhaustedContainer}>
+              <Text style={styles.exhaustedTitle}>You've seen it all!</Text>
+              <Text style={styles.exhaustedSubtitle}>
+                More masterpieces are coming in the next update.
+              </Text>
+            </View>
+          ) : loadingMore ? (
+            <Text style={styles.loadingText}>Loading more...</Text>
           ) : null
         }
       />
@@ -129,5 +162,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     textTransform: "uppercase",
     fontFamily: "Inter-Regular",
+  },
+  exhaustedContainer: {
+    padding: 24,
+    alignItems: "center",
+  },
+  exhaustedTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#2C1B2E",
+    marginBottom: 8,
+  },
+  exhaustedSubtitle: {
+    fontSize: 13,
+    color: "#63385b",
+    textAlign: "center",
+    lineHeight: 20,
   },
 });

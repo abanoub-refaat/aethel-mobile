@@ -2,7 +2,7 @@ import "react-native-gesture-handler";
 
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import SplashScreen from "./src/screens/SplashScreen";
 import { NavigationContainer } from "@react-navigation/native";
