@@ -23,15 +23,37 @@ import {
   randomArtworkPicker,
   ARTWORK_TITLES,
 } from "../services/wikipedia";
+import { getLastSeen, saveLastSeen } from "../storage/lastSeen";
+import NetInfo from "@react-native-community/netinfo";
 
 export default function HomeScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [artwork, setArtwork] = useState<Artwork | null>(null);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     const loadArtwork = async () => {
+      const netState = await new Promise<boolean>((resolve) => {
+        const unsubscribe = NetInfo.addEventListener((state) => {
+          unsubscribe();
+          resolve(state.isConnected ?? false);
+        });
+      });
+
+      setInitializing(false);
+
+      if (!netState) {
+        const cached = await getLastSeen();
+        if (cached) {
+          setArtwork(cached);
+          const bookmarks = await getBookmarks();
+          setIsFavorite(bookmarks.some((b) => b.id === cached.id));
+        }
+        return;
+      }
+
       let result = null;
       let attempts = 0;
       while (!result && attempts < 10) {
@@ -39,12 +61,15 @@ export default function HomeScreen() {
         result = await fetchArtwork(title);
         attempts++;
       }
+
       if (result) {
         setArtwork(result as Artwork);
+        await saveLastSeen(result as Artwork);
         const bookmarks = await getBookmarks();
-        const alreadyBookmarked = bookmarks.some((b) => b.id === result!.id);
-        setIsFavorite(alreadyBookmarked);
-      } else console.log("Failed to load artwork after 10 attempts");
+        setIsFavorite(bookmarks.some((b) => b.id === result!.id));
+      } else {
+        console.log("Failed to load artwork after 10 attempts");
+      }
     };
     loadArtwork();
   }, []);
@@ -76,6 +101,15 @@ export default function HomeScreen() {
       }}
     >
       {artwork && <ArtWorkOverlay artwork={artwork} />}
+      {!artwork && !initializing && (
+        <View style={styles.offlineContainer}>
+          <Text style={styles.offlineTitle}>You're offline</Text>
+          <Text style={styles.offlineSubtitle}>
+            No cached painting available. Connect to the internet to discover
+            masterpieces.
+          </Text>
+        </View>
+      )}
       <View style={styles.topActionContainer}>
         <Pressable
           onPress={async () => {
@@ -162,5 +196,21 @@ const styles = StyleSheet.create({
     color: "#ff6b6b",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  offlineContainer: {
+    alignItems: "center",
+    padding: 32,
+  },
+  offlineTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#f6f4f0",
+    marginBottom: 8,
+  },
+  offlineSubtitle: {
+    fontSize: 14,
+    color: "rgba(246, 244, 240, 0.7)",
+    textAlign: "center",
+    lineHeight: 22,
   },
 });
