@@ -118,6 +118,10 @@ const cleanTitle = (rawTitle: string): string => {
     .replace("File:", "")
     .replace(/\.[^.]+$/, "")
     .replace(/_/g, " ")
+    .replace(/\s*-\s*Google Art Project/gi, "")
+    .replace(/\s*-\s*Google Cultural Institute/gi, "")
+    .replace(/\s*-\s*WGA\d+/gi, "")
+    .replace(/\s*[\(\[].*?[\)\]]/g, "")
     .trim();
 };
 
@@ -165,8 +169,12 @@ const fetchArtwork = async (title: string) => {
         meta.ImageDescription?.value || "No description available.",
       ),
       imageUrl: imageUrl,
-      medium: stripHtml(meta.Medium?.value || ""),
-      location: stripHtml(meta.Credit?.value || ""),
+      medium: stripHtml(
+        meta.Medium?.value || meta.ObjectType?.value || "Unkown medium",
+      ),
+      location: stripHtml(
+        meta.Institution?.value || meta.Collection?.value || "Unkown location",
+      ),
       isPublicDomain: true,
       source: "wikimedia" as const,
     };

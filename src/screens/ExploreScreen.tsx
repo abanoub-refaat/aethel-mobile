@@ -5,6 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Artwork } from "../types";
 import { ARTWORK_TITLES, fetchArtwork } from "../services/wikipedia";
 import ArtworkCard from "../components/ArtworkCard";
+import { useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import NetInfo from "@react-native-community/netinfo";
 
@@ -16,6 +17,17 @@ export default function ExploreScreen() {
   const [listExhausted, setListExhausted] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const navigation = useNavigation<any>();
+
+  const keyExtractor = useCallback((item: Artwork) => item.id, []);
+  const renderItem = useCallback(
+    ({ item }: { item: Artwork }) => (
+      <ArtworkCard
+        artwork={item}
+        onPress={() => navigation.navigate("Details", { artwork: item })}
+      />
+    ),
+    [],
+  );
 
   const fetchMultipleArtworks = async (
     count: number,
@@ -94,13 +106,8 @@ export default function ExploreScreen() {
         onEndReachedThreshold={0.5}
         numColumns={2}
         data={artworks}
-        renderItem={({ item }) => (
-          <ArtworkCard
-            artwork={item}
-            onPress={() => navigation.navigate("Details", { artwork: item })}
-          />
-        )}
-        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
         contentContainerStyle={{ padding: 8 }}
         ListFooterComponent={
           listExhausted ? (

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
-import React from "react";
+import React, { memo } from "react";
 import { Artwork } from "../types";
 
 interface Props {
@@ -7,7 +7,7 @@ interface Props {
   onPress: () => void;
 }
 
-export default function ArtworkCard({ artwork, onPress }: Props) {
+const ArtworkCard = memo(function ArtworkCard({ artwork, onPress }: Props) {
   return (
     <View style={styles.card}>
       <Pressable onPress={onPress} style={{ flex: 1 }}>
@@ -30,7 +30,9 @@ export default function ArtworkCard({ artwork, onPress }: Props) {
       </Pressable>
     </View>
   );
-}
+});
+
+export default ArtworkCard;
 
 const styles = StyleSheet.create({
   card: {
