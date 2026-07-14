@@ -41,6 +41,7 @@ module.exports = {
       groqApiKey: process.env.GROQ_API_KEY,
     },
     plugins: [
+      "./plugins/withFileProvider",
       [
         "expo-media-library",
         {
